@@ -8,7 +8,7 @@ verification_code= []
 for i in range(0,7):
     random_number = random.randint(low,high)
     verification_code.append(random_number)
-print(f"Befor: {verification_code}")
+print(f"Befoer: {verification_code}")
 result = "".join(map(str, verification_code))
 print(result)
 
