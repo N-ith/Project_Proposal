@@ -1,7 +1,12 @@
 --->On Mac might pop up this message: 'cls' is not recognized as an internal or external command, operable program or batch file.
     #Solve it by changing os.system('cls') on line 29 to os.system('clear')
     
---------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
+library to install: 
+  - pip install smtplib
+  - pip install pyqt5
+  - pip install gspread
+  - pip install oauth2client
 
 Register:
 + Username: check for uniqueness
