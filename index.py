@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QMessageBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from test import FileHandler  # Assuming FileHandler is in a separate file
+from Database import FileHandler  # Assuming FileHandler is in a separate file
 
 class AuthApp(QWidget):
     def __init__(self):
