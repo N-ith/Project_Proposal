@@ -116,7 +116,7 @@ class Register:
         else:
             pass
 
-    def register(self):
+    def main(self):
         self.header()
         username = self.check_username()
         gmail = self.check_email()
@@ -133,6 +133,6 @@ class Register:
             file.write("Password: "+ password + '\n')
 
 
-register_obj = Register()
-
-register_obj.register()
+def register_function():
+    register_obj = Register()
+    register_obj.main()
