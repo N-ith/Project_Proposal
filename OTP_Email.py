@@ -10,7 +10,7 @@ def send_otp(reciever_gmail):
     # enter your gmail (host gmail/ sender gmail)
     gmail = "sophanithan2@gmail.com"
     # enter your google app password
-    google_app_password = "ofym wwzi fwzh xadx"
+    google_app_password = "google app password"
     # ctrl+click on this link to get google account password: https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmyaccount.google.com%2Fapppasswords&followup=https%3A%2F%2Fmyaccount.google.com%2Fapppasswords&ifkv=AcMMx-egbmBzat9KbYWtPtQad408VvqcOQifFoQAQgLmDOZJJCqHIv0GUoFtTQ6mppxnvNt67m8FiA&osid=1&passive=1209600&rart=ANgoxcfjlkg4rAxvilJQI3Z5FGJCjwAwAe55A3VIxMVdeA2_1vY0D-zqFBiZzdUY1StBoPG5Gc0P0hedpLl59xUDplFhWd78YHTH53c7wpOb48nx63xHxWc&service=accountsettings&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S-1140668789%3A1733653089952120&ddm=1
 
     # to store the OTP code
