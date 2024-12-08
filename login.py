@@ -47,17 +47,7 @@ class Login:
                 print("Too many failed attempts. Returning to the menu.")
                 break
 
-    def register(self):
-        """
-        Registers a new user by adding their details to the Google Sheet.
-        """
-        username = input("Enter a username: ").strip()
-        email = input("Enter an email: ").strip()
-        password = input("Enter a password: ").strip()
 
-        # Add the new user to the Google Sheet
-        self.file_handler.add_user(username, email, password)
-        print("Registration successful! You can now log in.")
 
 # Example Usage
 if __name__ == "__main__":
