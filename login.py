@@ -27,7 +27,7 @@ class Login:
                 # Offer registration or return to menu
                 choice = input("Would you like to register an account? (yes/no): ").strip().lower()
                 if choice == "yes":
-                    self.register()
+                    self.register() #wait for register
                 else:
                     print("Returning to the main menu.")
                     break
