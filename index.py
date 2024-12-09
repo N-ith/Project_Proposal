@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QMessageBox
 from PyQt5.QtCore import Qt
 from test import FileHandler  # Assuming FileHandler is in a separate file
-from email_test import send_verification_email  # Import the function from email_test.py
+from email_test import OTPHandler  # Import the OTPHandler class
 
 class AuthApp(QWidget):
     def __init__(self):
@@ -10,6 +10,7 @@ class AuthApp(QWidget):
 
         # Initialize the FileHandler class
         self.file_handler = FileHandler()
+        self.otp_handler = OTPHandler()  # Create an instance of OTPHandler
 
         # Set up the UI components
         self.initUI()
@@ -130,7 +131,6 @@ class AuthApp(QWidget):
         self.back_to_login_button.clicked.connect(self.show_login_view)
         self.dynamic_content_layout.addWidget(self.back_to_login_button)
 
-
     def sign_up(self):
         """Sign up new user."""
         username = self.username_input.text()
@@ -153,8 +153,6 @@ class AuthApp(QWidget):
                 self.show_message('Error', 'Registration failed. Please try again later.')
         else:
             self.show_message('Error', 'Please fill in all fields.')
-
-
 
     def show_reset_password_view(self):
             """Switch to forgot password view."""
@@ -198,12 +196,10 @@ class AuthApp(QWidget):
         if username:
             email = self.file_handler.get_user_email(username)
             if email:
-                # FileHandler sends the OTP and stores it internally
-                self.otp_sent = self.file_handler.send_otp(username)
-                if self.otp_sent:
-                    self.show_message('OTP Sent', f'OTP has been sent to {email}. Please check your inbox.')
-                else:
-                    self.show_message('Error', 'Failed to send OTP. Try again later.')
+                # Use OTPHandler to send OTP
+                self.otp_sent = True
+                self.otp_handler.send_verification_email(email)  # Send OTP
+                self.show_message('OTP Sent', f'OTP has been sent to {email}. Please check your inbox.')
             else:
                 self.show_message('Error', 'No user found with that username.')
         else:
@@ -219,7 +215,7 @@ class AuthApp(QWidget):
             self.show_message('Error', 'Please send OTP first by clicking "Send OTP".')
             return
 
-        if self.file_handler.verify_otp(username, entered_otp):  # Check OTP using FileHandler method
+        if self.otp_handler.verify_otp(entered_otp):  # Check OTP using OTPHandler
             if self.file_handler.reset_password(username, new_password):
                 self.show_message('Success', 'Password reset successfully.')
                 self.show_login_view()
