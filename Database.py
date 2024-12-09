@@ -1,111 +1,82 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import requests
 
 class FileHandler:
     def __init__(self):
-        """
-        Initializes the connection to the centralized Google Sheet.
-        This version only includes functions to add a user, verify a user, and reset a user's password.
-        """
-        # Define the scope for Google Sheets and Drive API
+        """Initialize connection to the fixed user database."""
+        self.json_key_path = "database key.json"
         self.scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-
-        # Path to your service account JSON key file and sheet name
-        self.json_key_path = 'database key.json'  # Replace with actual file path
-        self.sheet_name = 'Centralized_Authentication_System'  # Replace with the name of your sheet
-
-        # Authenticate using service account credentials
         self.credentials = ServiceAccountCredentials.from_json_keyfile_name(self.json_key_path, self.scope)
         self.client = gspread.authorize(self.credentials)
+        self.sheet_name = 'Centralized_Authentication_System'
 
+        # Connect to the specified spreadsheet and worksheet
+        self.spreadsheet = self.client.open(self.sheet_name)
+        self.worksheet = self.spreadsheet.get_worksheet(0)
+
+    def is_username_unique(self, username):
+        """Check if the username is unique."""
+        return not self.worksheet.find(username.strip())
+    
+    def get_user_email(self, username):
+        """Retrieve the email address associated with a given username."""
         try:
-            # Try to open the specified Google Sheet
-            self.spreadsheet = self.client.open(self.sheet_name)
-            print(f"Spreadsheet '{self.sheet_name}' found.")
-        except gspread.exceptions.SpreadsheetNotFound:
-            # If the sheet does not exist, create a new one
-            print(f"Spreadsheet '{self.sheet_name}' not found. Creating it.")
-            self.spreadsheet = self.client.create(self.sheet_name)
-            print(f"Spreadsheet '{self.sheet_name}' created.")
-        
-        # Access the first worksheet
-        self.worksheet = self.spreadsheet.get_worksheet(0)  # Access the first sheet
-        print(f"Accessing worksheet: {self.worksheet.title}")
-
-    def add_user(self, username, password):
-        """
-        Adds a new user to the Google Sheet.
-
-        :param username: The username to add
-        :param password: The password to add
-        """
-        existing_users = self.worksheet.col_values(1)  # Get all usernames from the first column
-        if username in existing_users:
-            print(f"Username '{username}' already exists.")
-            return False
-        # Append the new user's username and password to the sheet
-        self.worksheet.append_row([username, password])
-        print(f"User '{username}' added successfully.")
-        return True
-
-    def verify_user(self, username, password=None):
-        """
-        Verifies if the provided username and password match.
-
-        :param username: The username to verify
-        :param password: The password to verify (optional for existence check)
-        :return: True if the username and password match, False otherwise
-        """
-        try:
-            # Find the row with the given username
-            user_row = self.worksheet.find(username).row
-
-            if password:  # If password is provided, check it
-                stored_password = self.worksheet.cell(user_row, 2).value  # Get the stored password from the second column
-                if stored_password == password:
-                    return True  # Password matches
-                else:
-                    return False  # Password does not match
+            user_cell = self.worksheet.find(username.strip())
+            if user_cell:
+                user_row = user_cell.row
+                return self.worksheet.cell(user_row, 4).value.strip()  # Email is in the 4th column
             else:
-                return True  # If no password is provided, only check if the username exists
+                return None  # If username is not found, return None
+        except Exception as e:
+            print(f"Error fetching email for {username}: {e}")
+            return None
 
-        except gspread.exceptions.CellNotFound:
-            # If the username is not found
+    def add_user(self, username, password, ip_address, email):
+        """Add a new user with the given details (username, password, IP address, email)."""
+        if not self.is_username_unique(username):
+            raise ValueError("Username already exists.")
+        # Add user info to the spreadsheet, including email
+        self.worksheet.append_row([username.strip(), password.strip(), ip_address, email])
+
+    def verify_user(self, username, password, ip_address):
+        """Validate user credentials (username, password, and IP address)."""
+        try:
+            user_cell = self.worksheet.find(username.strip())
+            if not user_cell:
+                return "Username not found."  # Username is invalid
+
+            user_row = user_cell.row
+            stored_password = self.worksheet.cell(user_row, 2).value.strip()
+            stored_ip = self.worksheet.cell(user_row, 3).value.strip()
+
+            if stored_password != password.strip():
+                return "Incorrect username or password."  # Password is invalid
+
+            if stored_ip != ip_address:
+                return "IP address mismatch. Please log in from the registered location."  # IP mismatch
+
+            return True  # Valid credentials
+        except Exception as e:
+            print(f"Error during verification: {e}")
             return False
 
     def reset_password(self, username, new_password):
-        """
-        Resets the password for a given username.
-
-        :param username: The username to reset
-        :param new_password: The new password to set
-        :return: True if the password is successfully reset, False otherwise
-        """
+        """Reset the user's password."""
         try:
-            # Try to find the row containing the username
-            user_row = self.worksheet.find(username).row
-            # Update the password in the second column
-            self.worksheet.update_cell(user_row, 2, new_password)  
-            print(f"Password for '{username}' reset successfully.")
+            user_cell = self.worksheet.find(username.strip())
+            self.worksheet.update_cell(user_cell.row, 2, new_password.strip())  # Update password
             return True
-        except gspread.exceptions.CellNotFound:
-            # If the username is not found, handle the exception
-            print(f"Username '{username}' not found.")
+        except Exception as e:
+            print(f"Error resetting password: {e}")
             return False
 
-            
-# Test the code
-if __name__ == "__main__":
-    file_handler = FileHandler()
-    
-    # Add a user
-    file_handler.add_user('test_user', 'test_password')
-
-    # Verify the user
-    file_handler.verify_user('test_user', 'test_password')
-
-    # Reset password for the user
-    file_handler.reset_password('test_user', 'new_password')
-
-    # Verify the user after password reset
-    file_handler.verify_user('test_user', 'new_password')
+    def get_ip_address(self):
+        """Retrieve the user's IP address."""
+        try:
+            response = requests.get("https://api.ipify.org?format=json", timeout=5)
+            response.raise_for_status()
+            return response.json().get("ip", "Unknown")
+        except Exception as e:
+            print(f"Error fetching IP address: {e}")
+            return None
