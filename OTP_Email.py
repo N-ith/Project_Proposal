@@ -17,10 +17,10 @@ class OTPHandler:
             self.generate_otp()
 
         # No-reply email account configuration
-        email = "buthdavid25@gmail.com"  # Replace with your no-reply email address
+        email = "sophanithan2@gmail.com"  # Replace with your no-reply email address
 
         # Read app password from a file
-        password_file = "gmail password.txt"  # Name of the file containing the password
+        password_file = "password.txt"  # Name of the file containing the password
         try:
             with open(password_file, "r") as file:
                 app_password = file.read().strip()  # Read and strip any extra whitespace
