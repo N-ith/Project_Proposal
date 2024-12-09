@@ -1,7 +1,6 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import requests
-from email_test import send_verification_email  # Import the function from email_test.py
 
 class FileHandler:
     def __init__(self):
@@ -15,9 +14,6 @@ class FileHandler:
         # Connect to the specified spreadsheet and worksheet
         self.spreadsheet = self.client.open(self.sheet_name)
         self.worksheet = self.spreadsheet.get_worksheet(0)
-
-        # Initialize OTP variable
-        self.otp = None
 
     def is_username_unique(self, username):
         """Check if the username is unique."""
@@ -65,30 +61,16 @@ class FileHandler:
             print(f"Error during verification: {e}")
             return False
 
-    def send_otp(self, username):
-        """Send OTP to the user's email and store it."""
-        email = self.get_user_email(username)
-        if email:
-            self.otp = send_verification_email(email)
-            return True
-        return False
-
-    def verify_otp(self, username, entered_otp):
-        """Verify the entered OTP against the stored OTP."""
-        if self.otp == entered_otp:
-            return True
-        return False
-
     def reset_password(self, username, new_password):
-        """Reset the user's password after OTP verification."""
+        """Reset the user's password."""
         try:
             user_cell = self.worksheet.find(username.strip())
             self.worksheet.update_cell(user_cell.row, 2, new_password.strip())  # Update password
-            self.otp = None  # Clear OTP after reset
             return True
         except Exception as e:
             print(f"Error resetting password: {e}")
             return False
+
     def get_ip_address(self):
         """Retrieve the user's IP address."""
         try:
