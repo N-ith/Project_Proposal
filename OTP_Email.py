@@ -1,40 +1,55 @@
 import smtplib
 import random
 
-# Check line 10 and 12
-def send_otp(reciever_gmail):
-    # low, high can be modified depend on the range of your OTP
-    low = 0
-    high = 9
+class OTPHandler:
+    def __init__(self):
+        self.verification_code = None
 
-    # enter your gmail (host gmail/ sender gmail)
-    gmail = "sophanithan2@gmail.com"
-    # enter your google app password
-    google_app_password = "google app password"
-    # ctrl+click on this link to get google account password: https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmyaccount.google.com%2Fapppasswords&followup=https%3A%2F%2Fmyaccount.google.com%2Fapppasswords&ifkv=AcMMx-egbmBzat9KbYWtPtQad408VvqcOQifFoQAQgLmDOZJJCqHIv0GUoFtTQ6mppxnvNt67m8FiA&osid=1&passive=1209600&rart=ANgoxcfjlkg4rAxvilJQI3Z5FGJCjwAwAe55A3VIxMVdeA2_1vY0D-zqFBiZzdUY1StBoPG5Gc0P0hedpLl59xUDplFhWd78YHTH53c7wpOb48nx63xHxWc&service=accountsettings&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S-1140668789%3A1733653089952120&ddm=1
+    def generate_otp(self):
+        """Generate a 7-digit OTP."""
+        self.verification_code = ''.join([str(random.randint(0, 9)) for _ in range(7)])
+        print(f"Generated OTP: {self.verification_code}")  # Debugging line
+        return self.verification_code
 
-    # to store the OTP code
-    verification_code= []
-    # random OTP
-    for i in range(0,6):
-        random_number = random.randint(low,high)
-        verification_code.append(random_number)
-    result = "".join(map(str, verification_code))
+    def send_verification_email(self, receiver_email):
+        """Send the OTP to the user's email."""
+        if self.verification_code is None:
+            self.generate_otp()
 
-    email = gmail
-    reciever_email = reciever_gmail
+        # No-reply email account configuration
+        email = "buthdavid25@gmail.com"  # Replace with your no-reply email address
 
-    #subject, message and content can be modify
-    subject = "Security Alert!!!"
-    message = f"Verification code: {result}"
-    content = f"Subject: {subject}\n\n{message}"
+        # Read app password from a file
+        password_file = "gmail password.txt"  # Name of the file containing the password
+        try:
+            with open(password_file, "r") as file:
+                app_password = file.read().strip()  # Read and strip any extra whitespace
+        except FileNotFoundError:
+            print(f"Error: Password file '{password_file}' not found.")
+            exit()
+        except Exception as e:
+            print(f"Error reading password file: {e}")
+            exit()
 
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
+        # Email content
+        subject = "Security Alert!!!"
+        message = f"Your verification code is: {self.verification_code}"
+        content = f"Subject: {subject}\n\n{message}"
 
-    server.login(email, google_app_password) 
-    
-    server.sendmail(email, reciever_email, content)
-    print(f"Verification code sent to {reciever_gmail}")
+        # Set up the SMTP server
+        try:
+            server = smtplib.SMTP("smtp.gmail.com", 587)  # For Gmail
+            server.starttls()  # Start TLS encryption
+            server.login(email, app_password)
+            server.sendmail(email, receiver_email, content)
+            print("Verification email sent successfully!")
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+        finally:
+            server.quit()
 
-    return result
+    def verify_otp(self, entered_otp):
+        """Verify the entered OTP against the generated one."""
+        if self.verification_code == entered_otp:
+            return True
+        return False
