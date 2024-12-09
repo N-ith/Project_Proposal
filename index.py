@@ -1,8 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QMessageBox
 from PyQt5.QtCore import Qt
-from test import FileHandler  # Assuming FileHandler is in a separate file
-from email_test import OTPHandler  # Import the OTPHandler class
+from Database import FileHandler  # Assuming FileHandler is in a separate file
+from OTP_Email import OTPHandler  # Import the OTPHandler class
 
 class AuthApp(QWidget):
     def __init__(self):
