@@ -89,7 +89,12 @@ class Register:
             password = pwinput("Enter your password: ", '*')
             strength = self.check_password_strength(password)
             if strength == "strong":
-                return password
+                while True:
+                    confirm = input("Re-Enter password: ")
+                    if (confirm == password):
+                        return password
+                    else:
+                        print("Password miss matched.")
             else:
                 print("Your password need to contain lower case, upper case, a number and a special character, \nPlease enter a new password...")
 
@@ -127,12 +132,9 @@ class Register:
         self.open_file_append("database/username.txt", username)
         self.open_file_append("database/gmail.txt", gmail)
         self.open_file_append("database/password.txt", password)
-        with open("database/user_account.txt", 'a') as file:
-            file.write("Username: "+ username + ', ')
-            file.write("Gmail: "+ gmail + ', ')
-            file.write("Password: "+ password + '\n')
-
 
 def register_function():
     register_obj = Register()
     register_obj.main()
+
+register_function()
